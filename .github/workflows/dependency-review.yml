@@ -1,0 +1,27 @@
+
+name: Dependency Review
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+# Runs when dependencies change through a PR
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    name: Review dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v5
+# uses GitHub's dependency comparison and vulnerability check and fails on high and critical vulnerabilities in runtime, dev or unknown dependencies
+        with:
+          fail-on-severity: high
+          fail-on-scopes: runtime,development,unknown
