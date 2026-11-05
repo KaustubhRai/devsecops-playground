@@ -1,11 +1,9 @@
 name: Nuclei Vulnerability Scan
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 1'
 
 permissions:
   contents: read
@@ -38,10 +36,26 @@ jobs:
           docker compose logs
           exit 1
 
-      - name: Prepare Nuclei output directory
+      - name: Prepare Nuclei directories
         run: |
           mkdir -p "$GITHUB_WORKSPACE/nuclei-output"
+          mkdir -p "$GITHUB_WORKSPACE/nuclei-cache"
           chmod 777 "$GITHUB_WORKSPACE/nuclei-output"
+          chmod 777 "$GITHUB_WORKSPACE/nuclei-cache"
+
+      - name: Generate weekly cache key
+        id: cache-key
+        run: |
+          echo "week=$(date -u +'%G-W%V')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Nuclei templates
+        id: nuclei-cache
+        uses: actions/cache@v4
+        with:
+          path: nuclei-cache
+          key: nuclei-templates-${{ runner.os }}-v3.11.1-${{ steps.cache-key.outputs.week }}
+          restore-keys: |
+            nuclei-templates-${{ runner.os }}-v3.11.1-
 
       - name: Run Nuclei
         run: |
@@ -55,6 +69,7 @@ jobs:
 
           docker run --rm \
             --network "$APP_NETWORK" \
+            -v "$GITHUB_WORKSPACE/nuclei-cache:/root/nuclei-templates:rw" \
             -v "$GITHUB_WORKSPACE/nuclei-output:/output:rw" \
             projectdiscovery/nuclei:v3.11.1 \
             -u http://app:3000 \
