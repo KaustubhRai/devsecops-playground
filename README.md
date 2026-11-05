@@ -1,10 +1,13 @@
 # devsecops-playground
 creating this repo for my reference for SAST, SCA, DAST, container scanning, etc.
 
+basically a hands-on playground for understanding and implementing security controls across SDLC
+
 
 ## Stage 1- Design and architecture
 | _Before Developement - Identify security risks before code is written_
 
+ Maintained in the docs/ directory.
 
 | What we implement| What we use |
 | ---------------------------------------------------- | ---------------- |
@@ -37,12 +40,21 @@ Contents in (/Docs)[/docs]
 
 | Control | Tools |
 |-----|---- | 
-| SAST| CodeQL|
+|CI Pipeline|GitHub Actions|
+|SAST| CodeQL|
 | Secret Scanning| Git Leaks / Secret Scanning|
 | SCA	| depandabot|
 |PR checks|	Github Actions|
 |Branch Protection|	GIthub Repository Ruleset|
 |Code Review|	CODEOWNERS |
+
+
+
+
+CodeQL analyses source code for security vulnerabilities. Gitleaks detects secrets, while Dependabot and Dependency Review focus on dependency security.
+
+The CI workflow builds the application and runs unit and integration tests.
+
 
 
 
@@ -59,6 +71,13 @@ Contents in (/Docs)[/docs]
 |Vulnerability scanning |	Trivy|
 |Image signing |	Cosign|
 
+- Trivy scans the Docker image for vulnerabilities in operating-system packages and application dependencies.
+
+- Syft generates an SBOM, that provides an inventory of the components and dependencies included in the container image.
+
+- Checkov to inspect infrastructure-as-code configurations, and Hadolint to check Dockerfile quality and security practices.
+
+
 
 ## Stage 5 - Testing and Manual Security Validation
 | _Staging Env: Find vulnerabilities that static analysis and build-time checks cannot identify_
@@ -73,6 +92,14 @@ Contents in (/Docs)[/docs]
 |Authentication testing|	Custom security tests|
 |Authorization testing	|Custom security tests|
 
+- ZAP Baseline Scan runs against the application after it has been started in the CI environment, to perform crawling and passive security checks. 
+- Nuclei to do template-based vulnerability scanning against the running application
+- API Testing (Postman and ZAP API scanning) is deffered, as that requires an OpenAPI spec file but the test would contain:
+  - Authentication and session handling.
+  - Authorization and access-control enforcement.
+  - Broken Object Level Authorization (BOLA).
+  - Input validation.
+  - Rate limiting and resource consumption.
 
 
 ## Stage 6 - Release, Deployment, Operations
@@ -93,7 +120,7 @@ Deployment approvals	|GitHub Environments|
 
 
 
-### Running the App with docker
+### Running the App locally with docker
 
 ```bash
 cd devsecops-playground
