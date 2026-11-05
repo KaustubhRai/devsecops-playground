@@ -38,6 +38,11 @@ jobs:
           docker compose logs
           exit 1
 
+      - name: Prepare ZAP output directory
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/zap-output"
+          chmod 777 "$GITHUB_WORKSPACE/zap-output"
+
       - name: Run ZAP Baseline Scan
         run: |
           APP_CONTAINER=$(docker compose ps -q app)
@@ -50,7 +55,7 @@ jobs:
 
           docker run --rm \
             --network "$APP_NETWORK" \
-            -v "$GITHUB_WORKSPACE:/zap/wrk/:rw" \
+            -v "$GITHUB_WORKSPACE/zap-output:/zap/wrk/:rw" \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
             -t http://app:3000/health \
@@ -63,8 +68,8 @@ jobs:
         with:
           name: zap-baseline-report
           path: |
-            zap-report.html
-            zap-report.json
+            zap-output/zap-report.html
+            zap-output/zap-report.json
           if-no-files-found: warn
           retention-days: 7
 
