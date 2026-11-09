@@ -50,7 +50,7 @@ jobs:
 
       - name: Cache Nuclei templates
         id: nuclei-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: nuclei-cache
           key: nuclei-templates-${{ runner.os }}-v3.11.1-${{ steps.cache-key.outputs.week }}
